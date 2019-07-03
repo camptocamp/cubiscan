@@ -1,0 +1,31 @@
+language: python
+python:
+  - 3.6
+
+matrix:
+  include:
+  - python: 3.6
+    env: LINT=true
+  - python: 3.6
+    env: LINT=false
+
+before_script:
+  - if [ "$LINT" == false ] ; then pip install invoke pytest ; fi
+  - if [ "$LINT" == false ] ; then pip install . ; fi
+  - if [ "$LINT" == true ] ; then pip install flake8 readme_renderer ; fi
+
+script:
+  - if [ "$LINT" == false ] ; then py.test tests ; fi
+  - if [ "$LINT" == true ] ; then flake8 cubiscan tests ; fi
+  - if [ "$LINT" == true ] ; then python setup.py check -r -s ; fi
+
+deploy:
+  provider: pypi
+  skip_existing: true
+  user: $PYPI_USER
+  password: $PYPI_PASSWORD
+  distributions: sdist bdist_wheel
+  on:
+    repo: camptocamp/cubiscan
+    branch: master
+tags: true
