@@ -6,14 +6,14 @@ Provides an interface to a cubiscan machine.
 Usage
 -----
 
-```
+``
 from cubiscan.cubiscan import CubiScan
 
 
 obj = CubiScan(ip, port, timeout=timeout)
 
 obj.measure()
-```
+``
 
 Functions
 ---------
