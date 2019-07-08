@@ -45,6 +45,8 @@ def dom_intl_to_bool(value):
 
 
 def get_error(value):
+    """Get more sensible description for errors."""
+    # The chars are defined as capitals we will never be lowercase.
     value_str = decode(value)
     if value_str == 'C':
         return 'corner_sensor'
