@@ -20,6 +20,7 @@ class CubiScan(object):
         self.timeout = timeout
 
     def _make_request(self, command, param=None):
+        """Send a command to the cubiscan and await repsonse and parse it."""
         command_string = get_command_registry().build_command_string(
             command, param
         )
@@ -33,10 +34,13 @@ class CubiScan(object):
         return self._parse_response(data)
 
     def _parse_response(self, command, data):
+        """Parse the response."""
         mapping, neg_mapping = get_command_registry().get_response_for(command)
         used_map = mapping
         index = 0
         res_dict = {}
+        # we split the response by commata because they arent interesting but
+        # they split the response for dimensions etc
         sections = data.split(bytes(',', 'ascii'))
         for section in sections:
             start = 0
@@ -44,15 +48,20 @@ class CubiScan(object):
                 key = used_map[index]['key']
                 length = used_map[index]['length']
                 converter = used_map[index]['converter']
+                # we don't want stuff with no value in our dict
                 if key in EXCLUDED:
                     start += length
                     index += 1
                     continue
                 end = start + length
                 value = section[start:end]
+                # If we have a converter convert. Used to give back the right
+                # type e.g. convert floats from numbers to float.
                 res_dict[key] = converter(value) if converter else value
                 start = end
                 index += 1
+                # If we have a negative acknowledge we want to switch
+                # to the negative response.
                 if key == 'acknowledge' and not res_dict[key]:
                     used_map = neg_mapping
         return res_dict

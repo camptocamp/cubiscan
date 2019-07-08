@@ -12,6 +12,7 @@ def extract_measure(value):
 
 
 def base_extract(value):
+    """Extract the value and error if there are unprecise measurements."""
     acc_value = value[1:]
     error = None
     value_str = decode(acc_value)

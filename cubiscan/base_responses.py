@@ -1,5 +1,6 @@
 # Copyright 2019 Camptocamp SA
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0.en.html)
+"""Contains Base Response definitions as expected by the cubiscan."""
 
 from cubiscan import helpers
 

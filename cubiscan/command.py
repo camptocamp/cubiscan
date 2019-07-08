@@ -1,5 +1,6 @@
 # Copyright 2019 Camptocamp SA
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0.en.html)
+"""Defines a Registry for Commands and their Responses."""
 
 from cubiscan import base_responses
 
@@ -17,6 +18,7 @@ class CommandRegistry(object):
         self.init_base_mappings()
 
     def init_base_mappings(self):
+        """Register the base commands."""
         self.add_command(
             'continous_measure', bytes('C', 'ascii'),
             base_responses.MEASURE, base_responses.NEG_MEASURE
@@ -46,10 +48,16 @@ class CommandRegistry(object):
         self.add_command('zero', bytes('Z', 'ascii'), [], [])
 
     def add_command(self, name, command_bit, response, neg_response):
+        """
+        Add the bit inidicating the command the positive response and the
+        negative response to the dicts.
+        """
         self.command_bits[name] = command_bit
         self.response_mappings[name] = (response, neg_response)
 
     def build_command_string(self, name, params=None):
+        """Wrap command and params with the base stuff arround it.
+        """
         byte = self.command_bits[name]
         command = bytes.fromhex('02') + byte
         if params:
@@ -58,6 +66,7 @@ class CommandRegistry(object):
         return command
 
     def get_response_for(self, name):
+        """Get the Responses for a command and append the prefix and suffix."""
         specific_resp, specific_neg_resp = \
             self.response_mappings.get(name, ([], []))
         complete_resp = (base_responses.PREFIX +
@@ -69,6 +78,9 @@ class CommandRegistry(object):
 
 
 def get_command_registry():
+    """
+    Get the registry and always return same instance to allow for extension.
+    """
     global COMMAND_REGISTRY
     if not COMMAND_REGISTRY:
         COMMAND_REGISTRY = CommandRegistry()
