@@ -1,7 +1,8 @@
 CUBISCAN
 ========
 
-Provides an interface to a cubiscan machine.
+Provides an interface to a cubiscan devices (https://cubiscan.com/).
+These devices are used to measure and weigh objects. 
 
 Usage
 -----
