@@ -58,6 +58,8 @@ class CommandRegistry(object):
     def build_command_string(self, name, params=None):
         """Wrap command and params with the base stuff arround it.
         """
+        # All commands always have the following format
+        # <STX><COMMAND><DATA><ETX><CR><LF>
         byte = self.command_bits[name]
         command = bytes.fromhex('02') + byte
         if params:

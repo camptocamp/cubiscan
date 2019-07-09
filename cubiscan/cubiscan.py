@@ -13,29 +13,32 @@ class CubiScan(object):
     ip_address = None
     port = None
     timeout = None
+    registry = None
 
     def __init__(self, ip_address, port, timeout=30):
         self.ip_address = ip_address
         self.port = port
         self.timeout = timeout
+        self.registry = get_command_registry()
 
     def _make_request(self, command, param=None):
         """Send a command to the cubiscan and await repsonse and parse it."""
-        command_string = get_command_registry().build_command_string(
+        command_string = self.registry.build_command_string(
             command, param
         )
-        conn = socket.create_connection((self.ip_address, self.port))
-        conn.send(command_string)
-        conn.settimeout(self.timeout)
-        try:
+        with socket.create_connection((self.ip_address, self.port)) as conn:
+            conn.send(command_string)
+            conn.settimeout(self.timeout)
             data = conn.recv()
-        finally:
-            conn.close()
         return self._parse_response(data)
 
     def _parse_response(self, command, data):
         """Parse the response."""
-        mapping, neg_mapping = get_command_registry().get_response_for(command)
+
+        # all commands have the following format
+        # positive: <STX><COMMAND><A><DATA><ETX><CR><LF>
+        # negative: <STX><COMMAND><N><ETX><CR>
+        mapping, neg_mapping = self.registry.get_response_for(command)
         used_map = mapping
         index = 0
         res_dict = {}
@@ -89,6 +92,8 @@ class CubiScan(object):
         return self._make_request('set_factor', param)
 
     def set_location(self, location):
+        # All commands are specified to have a certain length we will extend
+        # it if it is too short.
         if len(location) < 6:
             location = ' ' * (6 - len(location)) + location
         return self._make_request('location', location)
@@ -97,11 +102,14 @@ class CubiScan(object):
         return self._make_request('measure')
 
     def calibrate_scale(self, weight):
+        # Check for the boundary values as defined by documentation
         if not weight > 50 and weight < 100:
             raise ValueError(
                 "Weight is not in specified range for calibration"
             )
         value = format(weight, '.2f')
+        # All commands are specified to have a certain length we will extend
+        # it if it is too short.
         if len(value) < 6:
             value = '0' * (6 - len(value)) + value
         return self._make_request('weight_calibration', value)
