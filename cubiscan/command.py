@@ -60,6 +60,13 @@ class CommandRegistry(object):
         """
         # All commands always have the following format
         # <STX><COMMAND><DATA><ETX><CR><LF>
+        # STX = start of text
+        # Command = The command you want to execute usually one ascii char
+        # Data = Additional data required but in a lot of cases this isnt given
+        # ETX = end of text
+        # CR = Carriage return
+        # LF = Line Feed
+
         byte = self.command_bits[name]
         command = bytes.fromhex('02') + byte
         if params:

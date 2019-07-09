@@ -1,7 +1,7 @@
 CUBISCAN
 ========
 
-Provides an interface to a cubiscan devices (https://cubiscan.com/).
+Provides an interface to cubiscan devices (https://cubiscan.com/).
 These devices are used to measure and weigh objects. 
 
 Usage
@@ -32,4 +32,3 @@ Following Functions of a Cubiscan are covered:
 - Units
 - Weight units
 - Zero
-- 
