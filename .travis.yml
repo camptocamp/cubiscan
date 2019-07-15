@@ -28,4 +28,4 @@ deploy:
   on:
     repo: camptocamp/cubiscan
     branch: master
-tags: true
+    tags: true
