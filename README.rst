@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.com/camptocamp/cubiscan.svg?branch=master
+    :target: https://travis-ci.com/camptocamp/cubiscan
+
 CUBISCAN
 ========
 
@@ -7,14 +10,13 @@ These devices are used to measure and weigh objects.
 Usage
 -----
 
-``
-from cubiscan.cubiscan import CubiScan
+.. code:: python
+
+  from cubiscan.cubiscan import CubiScan
 
 
-obj = CubiScan(ip, port, timeout=timeout)
-
-obj.measure()
-``
+  obj = CubiScan(ip, port, timeout=timeout)
+  obj.measure()
 
 Functions
 ---------
