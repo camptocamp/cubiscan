@@ -2,6 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0.en.html)
 
 import socket
+import ssl as SSL
 
 from cubiscan.command import get_command_registry
 
@@ -15,12 +16,22 @@ class CubiScan(object):
     timeout = None
     registry = None
     buffer_receive_size = None
+    ssl = None
 
-    def __init__(self, ip_address, port, timeout=30, buffer_recv_size=1024):
+    def __init__(self, ip_address, port, timeout=30, ssl=None,
+                 buffer_recv_size=1024):
         self.ip_address = ip_address
         self.port = port
         self.timeout = timeout
         self.buffer_receive_size = buffer_recv_size
+
+        if not ssl:
+            self.ssl = False
+        elif isinstance(ssl, SSL.SSLContext):
+            self.ssl = ssl
+        else:
+            self.ssl = SSL.create_default_context()
+
         self.registry = get_command_registry()
 
     def _make_request(self, command, param=None):
@@ -29,9 +40,15 @@ class CubiScan(object):
             command, param
         )
         with socket.create_connection((self.ip_address, self.port)) as conn:
-            conn.send(command_string)
-            conn.settimeout(self.timeout)
-            data = conn.recv(self.buffer_receive_size)
+            if self.ssl:
+                with self.ssl.wrap_socket(conn) as ssl_conn:
+                    ssl_conn.send(command_string)
+                    ssl_conn.settimeout(self.timeout)
+                    data = ssl_conn.recv(self.buffer_receive_size)
+            else:
+                conn.send(command_string)
+                conn.settimeout(self.timeout)
+                data = conn.recv(self.buffer_receive_size)
         return self._parse_response(data)
 
     def _parse_response(self, command, data):
