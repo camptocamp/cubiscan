@@ -14,11 +14,13 @@ class CubiScan(object):
     port = None
     timeout = None
     registry = None
+    buffer_receive_size = None
 
-    def __init__(self, ip_address, port, timeout=30):
+    def __init__(self, ip_address, port, timeout=30, buffer_recv_size=1024):
         self.ip_address = ip_address
         self.port = port
         self.timeout = timeout
+        self.buffer_receive_size = buffer_recv_size
         self.registry = get_command_registry()
 
     def _make_request(self, command, param=None):
@@ -29,7 +31,7 @@ class CubiScan(object):
         with socket.create_connection((self.ip_address, self.port)) as conn:
             conn.send(command_string)
             conn.settimeout(self.timeout)
-            data = conn.recv()
+            data = conn.recv(self.buffer_receive_size)
         return self._parse_response(data)
 
     def _parse_response(self, command, data):
