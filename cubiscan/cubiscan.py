@@ -26,7 +26,7 @@ class CubiScan(object):
         self.buffer_receive_size = buffer_recv_size
 
         if not ssl:
-            self.ssl = False
+            self.ssl = None
         elif isinstance(ssl, SSL.SSLContext):
             self.ssl = ssl
         else:
