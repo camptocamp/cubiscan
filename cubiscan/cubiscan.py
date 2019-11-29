@@ -49,7 +49,7 @@ class CubiScan(object):
                 conn.send(command_string)
                 conn.settimeout(self.timeout)
                 data = conn.recv(self.buffer_receive_size)
-        return self._parse_response(data)
+        return self._parse_response(command, data)
 
     def _parse_response(self, command, data):
         """Parse the response."""
