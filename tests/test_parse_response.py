@@ -88,3 +88,11 @@ def test_report_unit(scanner_obj):
     assert response['weight_metric'] is True
     assert response['intl_unit'] is True
     assert response['location'] == '004600'
+
+
+def test_parse_test_padded(scanner_obj):
+    response_msg = bytes('\x02TA42\x03\x0D\x0A\x00\x00', 'ascii')
+    response = scanner_obj._parse_response('test', response_msg)
+    assert response['command'] == 'T'
+    assert response['acknowledge'] is True
+    assert response['identifier'] == 42

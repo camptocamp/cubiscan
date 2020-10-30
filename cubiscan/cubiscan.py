@@ -1,12 +1,15 @@
 # Copyright 2019 Camptocamp SA
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0.en.html)
 
+import logging
 import socket
 import ssl as SSL
 
 from cubiscan.command import get_command_registry
 
 EXCLUDED = ['start', 'end', 'cr', 'lf']
+
+_logger = logging.getLogger('cubiscan')
 
 
 class CubiScan(object):
@@ -36,9 +39,11 @@ class CubiScan(object):
 
     def _make_request(self, command, param=None):
         """Send a command to the cubiscan and await repsonse and parse it."""
+        _logger.info('sending command %s %s', command, param or '')
         command_string = self.registry.build_command_string(
             command, param
         )
+        _logger.debug('command string: %s', command_string)
         with socket.create_connection((self.ip_address, self.port)) as conn:
             if self.ssl:
                 with self.ssl.wrap_socket(conn) as ssl_conn:
@@ -54,6 +59,8 @@ class CubiScan(object):
     def _parse_response(self, command, data):
         """Parse the response."""
 
+        data = data.rstrip(b'0x00')  # remove padding
+        _logger.debug('response: %s', data)
         # all commands have the following format
         # positive: <STX><COMMAND><A><DATA><ETX><CR><LF>
         # negative: <STX><COMMAND><N><ETX><CR>
@@ -67,7 +74,19 @@ class CubiScan(object):
         for section in sections:
             start = 0
             while start < len(section):
-                key = used_map[index]['key']
+                try:
+                    key = used_map[index]['key']
+                except IndexError:
+                    _logger.debug(
+                        'Unexpected content in response: %s',
+                        section[index:]
+                    )
+                    _logger.error(
+                        'Error parsing response section %s at index %d',
+                        section,
+                        index
+                    )
+                    break
                 length = used_map[index]['length']
                 converter = used_map[index]['converter']
                 # we don't want stuff with no value in our dict
@@ -86,6 +105,7 @@ class CubiScan(object):
                 # to the negative response.
                 if key == 'acknowledge' and not res_dict[key]:
                     used_map = neg_mapping
+        _logger.info('parsed response: %s', res_dict)
         return res_dict
 
     def continuous_measure(self):
